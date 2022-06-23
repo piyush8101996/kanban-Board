@@ -1,7 +1,8 @@
+import style from "./list.module.css"
 const List=({res,tablei,listi,handler})=>{
     return(
 <>
-<li style={{width:"200px",height:"50px",border:"2px solid black"}} onClick={() => handler(tablei,listi)}>{res}</li>
+<li className={style.list} onClick={() => handler(tablei,listi)}>{res.listdata}</li>
 </>
     )
 }

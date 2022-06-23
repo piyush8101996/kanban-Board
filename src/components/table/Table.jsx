@@ -6,35 +6,25 @@ const Table = ({ handler, list, item }) => {
 
     return (
         <>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Box sx={{ display: {xs:"block",sm:"flex",md:"flex"}, justifyContent: "space-evenly",width:"100%" ,}}>
 
 
                 {list.map((list,tableindex) => (
                     <>
-                      <div key={tableindex} style={{display:"flex",flexDirection:"column"}}>
-                      <Typography>{list.title}</Typography><br />
+                    
+                      <div key={tableindex} style={{display:"flex",flexDirection:"column",}}>
+                      <Typography sx={{fontSize:"30px",fontWeight:"100"}} >{list.title}</Typography><br />
                         {list.list.map((item,listindex)=>(
                             <>
-                            <List res={item} key={listindex} listi={listindex} tablei={tableindex} handler={handler} />
-                            {console.log(listindex,tableindex)}
+
+                            <List sx={{}} res={item} key={listindex} listi={listindex} tablei={tableindex} handler={handler} />
 
                             </>
-                            
-
-
                         ))} 
                       </div>
-                       
-                    
+                                        
                     </>
                 ))}
-
-
-
-
-
-
-
 
             </Box>
         </>

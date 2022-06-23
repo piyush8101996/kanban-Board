@@ -1,89 +1,157 @@
 import { Button, TextField, Typography } from "@mui/material";
+import { useEffect } from "react";
 import { useState } from "react";
 import Table from "../table/Table";
 
 const KanBanBoard = () => {
 
-    const [listdata, setListdata] = useState()
-    const [move, setMove] = useState({
-        itemlist: "",
-        tableindex:"",
-        itemindex:""
-    })
+    const [listdata, setListdata] = useState()               //inputlistdata
+    const [status, setStatus] = useState(false)                // forwardbtnstatus
+    const [dstatus, setDstatus] = useState(false)             // deletebtn status
+    const [bstatus, setBstatus] = useState(false)             //backwardbtn status
+
+    const [move, setMove] = useState({ itemlist: "", tableindex: "", itemindex: "" })   //movable data
+
     const [listitem, setListitem] = useState([
-        {
-            title: "Bcklog",
-            status: "backlog",
-            list: []
-        },
+        { title: "Backlog", status: "backlog", list: [] },
         { title: "ToDo", status: "todo", list: [] },
         { title: "Ongoing", status: "ongoing", list: [] },
         { title: "Done", status: "done", list: [] }
     ])
 
-    const clickHandler = () => {
-        // const {title,status}=data;
-        console.log(listitem[0].title, listitem[0].status, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,")
+    const CreateHandler = () => {
         const datas = [...listitem]
-        datas[0].list.push(listdata)
-        // console.log(datas)
-        // datas.push(listdata)
-        // console.log(datas)
-        setListitem(datas)
+        const id = Date.now()
+        if (listdata.trim()) {
+            datas[0].list.push({ listdata: listdata, id: id })
+            setListitem(datas)
+            setListdata('')
+
+        }
+
     }
 
 
-    const changeHandler = ((tableindex, listindex) => {
-        setMove({ itemlist: listitem[tableindex].list[listindex],
-             tableindex: tableindex, 
-             itemindex: listindex })
+    const selectHandler = ((tableindex, listindex) => {
+        setMove({
+            id: listitem[tableindex].list[listindex].id,
+            itemlist: listitem[tableindex].list[listindex].listdata,
+            tableindex: tableindex,
+        })
     })
 
-    console.log(move,"???????????????????????????????????s")
 
+    useEffect(() => {
+        if (listitem.length - 1 === move.tableindex || move.tableindex === "") {
+            setStatus(true)
+        } else {
+            setStatus(false)
+        }
+        if (move.tableindex === 0 || move.tableindex === "") {
+            setBstatus(true)
+        } else {
+            setBstatus(false)
+        }
+        if (move.tableindex === "") {
+            setDstatus(true)
+        } else {
+            setDstatus(false)
+        }
+    }, [move.tableindex])
+
+    const inputKeyUpHandler = (event) => {
+        if(event.key === "Enter"){
+            CreateHandler()
+        }
+    };
 
     const moveforward = () => {
-        console.log(listitem)
-         listitem.map((lists, tindex) => (
+        listitem.map((lists, tindex) => (
             lists.list.map((elem, lindex) => {
-                if (lindex === move.itemindex && tindex === move.tableindex ) {
-
+                console.log(lists, 'listsssssssssss')
+                if (elem.id === move.id && tindex === move.tableindex) {
                     const datas = [...listitem]
                     datas[tindex + 1].list.push(elem);
-                    datas[tindex].list.splice(lindex,1)
-                   console.log(datas,"update data.............")
-                   const updateMove={itemlist:elem,
-                    tableindex: tindex, 
-                    itemindex: lindex}
-                    console.log(updateMove,"move")
-                     setMove(updateMove)
-                    console.log(move,"innerrr.....update")
-
-                     setListitem(datas)
-
-                    // console.log(listitem[tindex].list[lindex])
-                    //    listitem[tindex+1].list[lindex].push(elem)
+                    datas[tindex].list.splice(lindex, 1)
+                    const updateMove = {
+                        tableindex: tindex + 1,
+                        id: elem.id,
+                        itemlist: elem.listdata
+                    }
+                    setMove(updateMove)
+                    setListitem(datas)
                 }
             })
-         ))
+        ))
+
     }
+
+    const moveBackward = () => {
+        listitem.map((lists, tindex) => (
+            lists.list.map((elem, lindex) => {
+                console.log(lists, 'listsssssssssss')
+                if (elem.id === move.id && tindex === move.tableindex) {
+                    const datas = [...listitem]
+                    datas[tindex - 1].list.push(elem);
+                    datas[tindex].list.splice(lindex, 1)
+                    const updateMove = {
+                        tableindex: tindex - 1,
+                        id: elem.id,
+                        itemlist: elem.listdata
+                    }
+                    setMove(updateMove)
+                    setListitem(datas)
+                }
+            })
+        ))
+    }
+
+
+
+    const deleteHandler = () => {
+        listitem.map((lists, tindex) => (
+            lists.list.map((elem, lindex) => {
+                if (elem.id === move.id && tindex === move.tableindex) {
+                    const datas = [...listitem]
+                    datas[tindex].list.splice(lindex, 1)
+                    const updateMove = {
+                        tableindex: "",
+                        id: "",
+                        itemlist: ""
+                    }
+                    setMove(updateMove)
+                    setListitem(datas)
+                }
+            })
+        ))
+
+    }
+
+
 
     return (
         <>
-            <Typography>Controls</Typography>
+           <div style={{backgroundColor:"#00FFFF",}}>
+           <Typography sx={{ fontSize: "30px", color: "#454545", fontWeight: "bold" }}>KanBanBoard App</Typography>
+            <div style={{display:"flex",flexDirection:"column",marginBottom:"30px",alignItems:"baseline",padding:"20px",}}>
 
-            <div>
-                <TextField onChange={(e) => setListdata(e.target.value)} value={listdata} />
-                <Button onClick={clickHandler}>Create</Button>
-            </div>
+                <div style={{justifyContent:"flex-start",alignItems:"flex-start",marginBottom:"20px"}}>
+                    <TextField onChange={(e) => setListdata(e.target.value)} value={listdata}  onKeyUp={inputKeyUpHandler} />
+                    <Button onClick={CreateHandler} variant="contained" sx={{ bgcolor: "#008000", color: "white", height: "52px", ml: 1 }}>Create</Button>
+                </div>
 
-            <div>
-                <TextField value={move.itemlist} />
-                <Button >Move Back</Button>
-                <Button onClick={moveforward}>Move Forward</Button>
-                <Button>Delete</Button>
+                <div >
+                    <TextField value={move.itemlist} sx={{marginRight:"10px"}} />
+                    <Button sx={{ color: "white", height: "52px",mr:1}} onClick={moveBackward} variant='contained' disabled={bstatus}>Move Back</Button>
+                    <Button sx={{ color: "white", height: "52px",bgcolor:"#800080",mr:1}} onClick={moveforward} variant='contained' disabled={status}>Move Forward</Button>
+                    <Button sx={{ color: "white", height: "52px",bgcolor:"#DE3163"}} variant='contained' disabled={dstatus} onClick={deleteHandler}>Delete</Button>
+                </div>
+
             </div>
-            <Table handler={changeHandler} list={listitem} />
+           </div>
+           
+
+            <Table handler={selectHandler} list={listitem} />
         </>
     )
 }
